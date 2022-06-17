@@ -12,17 +12,6 @@ from scipy.stats import norm
 def lignes(name):
     """
     Calculate the amount of ligns in a file
-
-    Parameters
-    ----------
-    name : str
-        File name.
-
-    Returns
-    -------
-    nligne : int
-        Number of ligns.
-
     """
     fichier = open(name)
     nligne = 0
@@ -34,17 +23,6 @@ def lignes(name):
 def colonnes(name):
     """
     Calculate the number of columns in a file
-
-    Parameters
-    ----------
-    name : str
-        File name.
-
-    Returns
-    -------
-    int
-        Amount of columns.
-
     """
     fichier = open(name)
     f = fichier.readline().split(" ")
@@ -53,17 +31,6 @@ def colonnes(name):
 def colonnes2(name):
     """
     Calculate the number of columns in a file
-
-    Parameters
-    ----------
-    name : str
-        File name.
-
-    Returns
-    -------
-    int
-        Amount of columns.
-
     """
     fichier = open(name)
     f = fichier.readline().split("\t")
@@ -72,21 +39,6 @@ def colonnes2(name):
 def data(name, ncol, nligne):
     """
     Extract the data from the file into a matrix (used for SIE and SI volume)
-
-    Parameters
-    ----------
-    name : str
-        File name.
-    ncol : int
-        amount of columns.
-    nligne : int
-        amount of rows.
-
-    Returns
-    -------
-    A : list
-        Data written in the file.
-
     """
     fichier = open(name)
     A = [[0.0]*ncol for i in range (nligne)]
@@ -99,22 +51,7 @@ def data(name, ncol, nligne):
 
 def data2(name, ncol, nligne):
     """
-    Extract the data from the file into a matrix (used for SI thickness)
-
-    Parameters
-    ----------
-    name : str
-        File name.
-    ncol : int
-        amount of columns.
-    nligne : int
-        amount of rows.
-
-    Returns
-    -------
-    A : list
-        Data extracted from the file.
-
+    Extract the data from the file into a matrix (used for SI thickness file)
     """
     fichier = open(name)
     A = [[0.0]*ncol for i in range (nligne)]
@@ -128,22 +65,6 @@ def data2(name, ncol, nligne):
 def extract_year(fichier, nlig, sie_all_months):
     """
     Extract the first column corresponding to the years from a file
-
-    Parameters
-    ----------
-    fichier : str
-        File name.
-    nlig : int
-        Number of rows in the file.
-    sie_all_months : list
-        SIE extracted from the file for every month and every year,
-        for example from the function data: data(fichier, ncol, nlig)
-
-    Returns
-    -------
-    year : list
-        List of years.
-
     """
     year = []
     for i in range(0,nlig):
@@ -153,26 +74,7 @@ def extract_year(fichier, nlig, sie_all_months):
 
 def extract_sie(fichier, nlig, ncol, sie_all_months, month):
     """
-    
-
-    Parameters
-    ----------
-    fichier : str
-        file name.
-    nlig : int
-        amount of rows.
-    ncol : int
-        amount of columns.
-    sie_all_months : float
-        sea ice extent.
-    month : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    sie : float
-        sea ice extent from the chosen month for all years.
-
+    Extract the first column corresponding to the years from a file
     """
     sie = []
     for i in range(0,nlig):
@@ -181,6 +83,9 @@ def extract_sie(fichier, nlig, ncol, sie_all_months, month):
     return sie
 
 def extract_thickness(fichier, nlig, ncol, month):
+    """
+    Extract the column corresponding to the sea ice thickness from a file
+    """
     thickness_all = data2(fichier, ncol, nlig)
     thickness = []
     for i in range(nlig):
@@ -189,6 +94,9 @@ def extract_thickness(fichier, nlig, ncol, month):
     return thickness
 
 def extract_volume(fichier, nlig, ncol, month):
+    """
+    Extract the column corresponding to the sea ice volume from a file
+    """
     volume_all = data(fichier, ncol, nlig)
     volume = []
     for i in range(nlig):
@@ -196,6 +104,9 @@ def extract_volume(fichier, nlig, ncol, month):
     return volume
 
 def regression_line(sie, year):
+    """
+    Calculate the regression line corresponding to a dataset (sie_regression) and the extrapolated value for 2022 (sie_reg_2022)
+    """
     sie_mean = sum(sie)/len(sie)
     year_mean = sum(year)/len(year)
     xy = 0.0
@@ -214,7 +125,7 @@ def regression_line(sie, year):
 
 def event_forecast(year, event, mu, sigma, sie_obs):
     """
-    To calculate event occurrence probability and corresponding observed frequencies
+    Calculate event occurrence probability (p_event), corresponding observed frequencies (obs_freq), if the event occurred each year (event_occ)
     """
     p_event = np.zeros(len(year)-2)
     obs_freq =  np.zeros(len(year)-2)
@@ -234,6 +145,10 @@ def event_forecast(year, event, mu, sigma, sie_obs):
     return p_event, obs_freq, event_occ, proba_color
 
 def stat_forecast(sie_sept, sie_may, year):
+    """
+    Calculate the forecasted SIE (mu), the corresponding standard deviation (sd), and the confidence interval (sd_min, sd_max)
+    based on September mean SIE and May anomaly
+    """
     mu = [0 for i in range(len(year)-2)]
     var = [0 for i in range(len(year)-2)]
     sd = [0 for i in range(len(year)-2)]
@@ -248,6 +163,10 @@ def stat_forecast(sie_sept, sie_may, year):
     return mu, sd, sd_min, sd_max
 
 def stat_forecast_all(sie_sept, sie_oct, sie_nov, sie_dec, sie_jan, sie_feb, sie_mar, sie_apr, sie_may, year):
+    """
+    Calculate the forecasted SIE (mu), the corresponding standard deviation (sd), and the confidence interval (sd_min, sd_max)
+    based on September mean SIE and October to May anomalies
+    """
     mu = [0 for i in range(len(year)-2)]
     var = [0 for i in range(len(year)-2)]
     sd = [0 for i in range(len(year)-2)]
@@ -275,8 +194,11 @@ def stat_forecast_all(sie_sept, sie_oct, sie_nov, sie_dec, sie_jan, sie_feb, sie
         sd_max[i-2] = mu[i-2] + 2 * sd[i-2]
     return mu, sd, sd_min, sd_max
 
-
 def verif_forecast(p, o, event_occ, n):
+    """
+    Calculate the Brier score (bs), reference Brier score corresponding to climatology (bs_ref) and Brier skill score
+    corresponding to retrospective probabilistic forecast
+    """
     bs = 0 # Brier score of the forecasts over 1981-2021
     bs_ref = 0 # Reference Brier score
     o_average = 0
@@ -312,8 +234,6 @@ sie_may = extract_sie(f, lignes(f), colonnes(f), data(f, colonnes(f), lignes(f))
 
 # Regression line
 sie_regression, sie_reg_2022 = regression_line(sie_sept, year)
-
-#---------------------------------------------------------------------------------------------------------------
 
 #Event definition: September Arctic sea ice extent will be less than previous year
 event = [] # Event
@@ -507,6 +427,7 @@ plt.plot(sie_sept_all[2:], mu_pp_2, 'o')
 plt.plot([4*1e6,9*1e6], [4*1e6,9*1e6], color='black')
 plt.title("Forecast (y-axis) vs observations (x-axis) for thickness")
 plt.show()"""
+
 
 #%%
 """
